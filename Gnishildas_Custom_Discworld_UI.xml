@@ -1,0 +1,729 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MudletPackage>
+<MudletPackage version="1.0">
+    <ScriptPackage>
+        <ScriptGroup isActive="yes" isFolder="yes">
+            <name>Template_Tom</name>
+            <packageName></packageName>
+            <script>-------------------------------------------------
+--         Put your Lua functions here.        --
+--                                             --
+-- Note that you can also use external Scripts --
+-------------------------------------------------
+</script>
+            <eventHandlerList/>
+            <ScriptGroup isActive="yes" isFolder="yes">
+                <name>CSSman</name>
+                <packageName>CSSman</packageName>
+                <script></script>
+                <eventHandlerList/>
+                <Script isActive="yes" isFolder="no">
+                    <name>CSSMan</name>
+                    <packageName></packageName>
+                    <script>-- CSSMan by Vadi. Public domain.
+
+CSSMan = {}
+CSSMan.__index = CSSMan
+
+function CSSMan.new(stylesheet)
+  local obj  = { stylesheet = {} }
+  setmetatable(obj,CSSMan)
+  local trim = string.trim
+
+  assert(type(stylesheet) == &quot;string&quot;, &quot;CSSMan.new: no stylesheet provided. A possible error is that you might have used CSSMan.new, not CSSMan:new&quot;)
+
+  for line in stylesheet:gmatch(&quot;[^\r\n]+&quot;) do
+    local attribute, value = line:match(&quot;^(.-):(.-);$&quot;)
+    if attribute and value then
+      attribute, value = trim(attribute), trim(value)
+      obj.stylesheet[attribute] = value
+    end
+  end
+
+  return obj
+end
+
+function CSSMan:set(key, value)
+  self.stylesheet[key] = value
+end
+
+function CSSMan:get(key)
+  return self.stylesheet[key]
+end
+
+function CSSMan:getCSS(key)
+  local lines, concat = {}, table.concat
+  for k,v in pairs(self.stylesheet) do lines[#lines+1] = concat({k,&quot;: &quot;, v, &quot;;&quot;}) end
+  return concat(lines, &quot;\n&quot;)
+end
+
+function CSSMan:gettable()
+  return self.stylesheet
+end
+
+function CSSMan:settable(tbl)
+  assert(type(tbl) == &quot;table&quot;, &quot;CSSMan:settable: table expected, got &quot;..type(tbl))
+
+  self.stylesheet = tbl
+end</script>
+                    <eventHandlerList/>
+                </Script>
+            </ScriptGroup>
+            <ScriptGroup isActive="yes" isFolder="yes">
+                <name>GUI</name>
+                <packageName></packageName>
+                <script>USE_COLOURED_MAP_HACK = 1337 --set to 1337 for coloured map hack, else 0 (colour requires options mxp enabled=off)
+--LARGEFONT --&gt; size 11 / wrap 41
+-- MEDFONT  --&gt; size 10 / wrap 49
+--SMALLFONT --&gt; size  9 / wrap 57
+
+
+
+MAPFONTSIZE = 15
+MAPBGCOLOR = &quot;black&quot;
+MAPISBOLD = true
+
+--satchel settings
+SATCHELFONTSIZE = 11
+SATCHELLINEWRAP = 41
+SATCHELBGCOLOR = &quot;black&quot;
+SATCHELISBOLD = true
+
+--[[
+--cloak settings
+CLOAKFONTSIZE = 9
+CLOAKLINEWRAP = 57
+CLOAKBGCOLOR = &quot;purple&quot;
+--]]
+
+--inventory settings
+INVENTORYFONTSIZE = 9
+INVENTORYLINEWRAP = 57
+INVENTORYBGCOLOR = &quot;black&quot;
+
+--score window settings
+SCORELINEWRAP = 47
+SCOREFONTSIZE = 10
+SCOREBGCOLOR = &quot;black&quot;
+
+--chat window settings
+CHATLINEWRAP = 40
+CHATFONTSIZE = 11
+CHATBGCOLOR = &quot;black&quot;
+
+HPBAR_COLOR = &quot;red&quot;
+GPBAR_COLOR = &quot;yellow&quot;
+XPBAR_COLOR = &quot;lightblue&quot;
+BURDENBAR_COLOR = &quot;purple&quot;
+
+MAXXP = 200000 --max xp in bar
+
+GUI = GUI or {}</script>
+                <eventHandlerList/>
+                <Script isActive="yes" isFolder="no">
+                    <name>Set Borders</name>
+                    <packageName></packageName>
+                    <script>local w,h = getMainWindowSize()
+setBorderLeft(w/4)
+setBorderTop(h/10)
+setBorderBottom(h/10)
+setBorderRight(w/4)</script>
+                    <eventHandlerList/>
+                </Script>
+                <Script isActive="yes" isFolder="no">
+                    <name>Create Background</name>
+                    <packageName></packageName>
+                    <script>GUI.BackgroundCSS = CSSMan.new([[
+  background-color: rgb(20,0,20);
+]])
+
+GUI.Left = Geyser.Label:new({
+  name = &quot;GUI.Left&quot;,
+  x = 0, y = 0,
+  width = &quot;25%&quot;,
+  height = &quot;100%&quot;,
+})
+GUI.Left:setStyleSheet(GUI.BackgroundCSS:getCSS())
+
+GUI.Right = Geyser.Label:new({
+  name = &quot;GUI.Right&quot;,
+  x = &quot;-25%&quot;, y = 0,
+  width = &quot;25%&quot;,
+  height = &quot;100%&quot;,
+})
+GUI.Right:setStyleSheet(GUI.BackgroundCSS:getCSS())
+
+GUI.Top = Geyser.Label:new({
+  name = &quot;GUI.Top&quot;,
+  x = &quot;25%&quot;, y = 0,
+  width = &quot;50%&quot;,
+  height = &quot;10%&quot;,
+})
+GUI.Top:setStyleSheet(GUI.BackgroundCSS:getCSS())
+
+GUI.Bottom = Geyser.Label:new({
+  name = &quot;GUI.Bottom&quot;,
+  x = &quot;25%&quot;, y = &quot;90%&quot;,
+  width = &quot;50%&quot;,
+  height = &quot;10%&quot;,
+})
+GUI.Bottom:setStyleSheet(GUI.BackgroundCSS:getCSS())</script>
+                    <eventHandlerList/>
+                </Script>
+                <Script isActive="yes" isFolder="no">
+                    <name>Header Icons</name>
+                    <packageName></packageName>
+                    <script>GUI.Header = Geyser.HBox:new({
+  name = &quot;GUI.Header&quot;,
+  x = 0, y = 0,
+  width = &quot;100%&quot;,
+  height = &quot;100%&quot;,
+},GUI.Top)
+
+GUI.IconCSS = CSSMan.new([[
+  background-color: rgba(0,0,0,100);
+  border-style: solid;
+  border-width: 1px;
+  border-color: white;
+  border-radius: 5px;
+  margin: 5px;
+  qproperty-wordWrap: true;
+]])
+
+for i=1,12 do
+  GUI[&quot;Icon&quot;..i] = Geyser.Label:new({
+    name = &quot;GUI.Icon&quot;..i,
+  },GUI.Header)
+  GUI[&quot;Icon&quot;..i]:setStyleSheet(GUI.IconCSS:getCSS())
+  GUI[&quot;Icon&quot;..i]:echo(&quot;&lt;center&gt;GUI. Icon&quot;..i)
+end</script>
+                    <eventHandlerList/>
+                </Script>
+                <ScriptGroup isActive="yes" isFolder="yes">
+                    <name>Boxes</name>
+                    <packageName></packageName>
+                    <script>-------------------------------------------------
+--         Put your Lua functions here.        --
+--                                             --
+-- Note that you can also use external Scripts --
+-------------------------------------------------
+
+
+GUI.BoxCSS = CSSMan.new([[
+  background-color: rgba(0,0,0,100);
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 10px;
+  border-color: white;
+  margin: 10px;
+]])
+
+GUI.Box1 = Geyser.Label:new({
+  name = &quot;GUI.Box1&quot;,
+  x = 0, y = &quot;50%&quot;,
+  width = &quot;100%&quot;,
+  height = &quot;25%&quot;,
+},GUI.Left)
+GUI.Box1:setStyleSheet(GUI.BoxCSS:getCSS())
+GUI.Box1:echo(&quot;&lt;center&gt;GUI.Box1 &lt;p&gt;(Satchel)&quot;)
+satchelconsole = satchelconsole or Geyser.MiniConsole:new({name = &quot;satchelconsole&quot;},GUI.Box1)
+satchelconsole:set_constraints({x = 20, y = 20, width=&quot;88%&quot;, height=&quot;76%&quot;})
+satchelconsole:setColor(SATCHELBGCOLOR)
+setMiniConsoleFontSize(&quot;satchelconsole&quot;,SATCHELFONTSIZE)
+setWindowWrap(&quot;satchelconsole&quot;,SATCHELLINEWRAP)
+setBold(satchelconsole.name,true)
+
+--[[
+GUI.Box2 = Geyser.Label:new({
+  name = &quot;GUI.Box2&quot;,
+  x = &quot;50%&quot;, y = 0,
+  width = &quot;50%&quot;,
+  height = &quot;25%&quot;,
+},GUI.Left)
+GUI.Box2:setStyleSheet(GUI.BoxCSS:getCSS())
+GUI.Box2:echo(&quot;&lt;center&gt;GUI.Box2 &lt;p&gt;(Cloak)&quot;)
+cloakconsole = cloakconsole or Geyser.MiniConsole:new({name = &quot;cloakconsole&quot;},GUI.Box2)
+cloakconsole:set_constraints({x = 20, y = 20, width=&quot;76%&quot;, height=&quot;76%&quot;})
+cloakconsole:setColor(CLOAKBGCOLOR)
+setMiniConsoleFontSize(&quot;cloakconsole&quot;,CLOAKFONTSIZE)
+setWindowWrap(&quot;cloakconsole&quot;,CLOAKLINEWRAP)
+--]]
+
+GUI.Box3 = Geyser.Label:new({
+  name = &quot;GUI.Box3&quot;,
+  x = 0, y = 0,
+  width = &quot;100%&quot;,
+  height = &quot;50%&quot;,
+},GUI.Left)
+GUI.Box3:setStyleSheet(GUI.BoxCSS:getCSS())
+GUI.Box3:echo(&quot;&lt;center&gt;GUI.Box3 &lt;p&gt;(Map)&quot;)
+mapconsole = mapconsole or Geyser.MiniConsole:new({name = &quot;mapconsole&quot;},GUI.Box3)
+mapconsole:set_constraints({x = 20, y = 20, width=&quot;88%&quot;, height=&quot;88%&quot;})
+mapconsole:setColor(MAPBGCOLOR)
+mapconsole:setFontSize(MAPFONTSIZE)
+setBold(mapconsole.name,MAPISBOLD)
+
+GUI.Box4 = Geyser.Label:new({
+  name = &quot;GUI.Box4&quot;,
+  x = 0, y = &quot;75%&quot;,
+  width = &quot;100%&quot;,
+  height = &quot;25%&quot;,
+},GUI.Left)
+GUI.Box4:setStyleSheet(GUI.BoxCSS:getCSS())
+GUI.Box4:echo(&quot;&lt;center&gt;GUI.Box4 &lt;p&gt;(Inventory)&quot;)
+iconsole = iconsole or Geyser.MiniConsole:new({name = &quot;iconsole&quot;},GUI.Box4)
+iconsole:set_constraints({x = 20, y = 20, width=&quot;88%&quot;, height=&quot;76%&quot;})
+iconsole:setColor(INVENTORYBGCOLOR)
+setMiniConsoleFontSize(&quot;iconsole&quot;,INVENTORYFONTSIZE)
+setWindowWrap(&quot;iconsole&quot;,INVENTORYLINEWRAP)
+
+GUI.Box5 = Geyser.Label:new({
+  name = &quot;GUI.Box5&quot;,
+  x = &quot;0%&quot;, y = &quot;0%&quot;,
+  width = &quot;100%&quot;,
+  height = &quot;35%&quot;,
+},GUI.Right)
+GUI.Box5:setStyleSheet(GUI.BoxCSS:getCSS())
+GUI.Box5:echo(&quot;&lt;center&gt;GUI.Box5 &lt;p&gt;(Score)&quot;)
+scoreconsole = scoreconsole or Geyser.MiniConsole:new({name = &quot;scoreconsole&quot;},GUI.Box5)
+scoreconsole:set_constraints({x = 20, y = 20, width=&quot;88%&quot;, height=&quot;84%&quot;})
+scoreconsole:setColor(SCOREBGCOLOR)
+setMiniConsoleFontSize(&quot;scoreconsole&quot;,SCOREFONTSIZE)
+setWindowWrap(&quot;scoreconsole&quot;,SCORELINEWRAP)
+
+--[[
+--use this one for friend chat
+GUI.Box5 = Geyser.Label:new({
+  name = &quot;GUI.Box5&quot;,
+  x = &quot;0%&quot;, y = &quot;50%&quot;,
+  width = &quot;100%&quot;,
+  height = &quot;50%&quot;,
+},GUI.Right)
+GUI.Box5:setStyleSheet(GUI.BoxCSS:getCSS())
+GUI.Box5:echo(&quot;&lt;center&gt;GUI.Box5&quot;)
+chatconsole = chatconsole or Geyser.MiniConsole:new({name = &quot;chatconsole&quot;},GUI.Box5)
+chatconsole:set_constraints({x = 20, y = 20, width=&quot;88%&quot;, height=&quot;88%&quot;})
+chatconsole:setColor(CHATBGCOLOR)
+setMiniConsoleFontSize(&quot;chatconsole&quot;,CHATFONTSIZE)
+setWindowWrap(&quot;chatconsole&quot;,CHATLINEWRAP)
+--]]
+
+GUI.Box6 = Geyser.Label:new({
+  name = &quot;GUI.Box6&quot;,
+  x = &quot;0%&quot;, y = &quot;35%&quot;,
+  width = &quot;100%&quot;,
+  height = &quot;65%&quot;,
+},GUI.Right)
+GUI.Box6:setStyleSheet(GUI.BoxCSS:getCSS())
+GUI.Box6:echo(&quot;&lt;center&gt;GUI.Box6&quot;)
+chatconsole = chatconsole or Geyser.MiniConsole:new({name = &quot;chatconsole&quot;},GUI.Box6)
+chatconsole:set_constraints({x = 20, y = 20, width=&quot;88%&quot;, height=&quot;90%&quot;})
+chatconsole:setColor(CHATBGCOLOR)
+setMiniConsoleFontSize(&quot;chatconsole&quot;,CHATFONTSIZE)
+setWindowWrap(&quot;chatconsole&quot;,CHATLINEWRAP)</script>
+                    <eventHandlerList/>
+                    <Script isActive="yes" isFolder="no">
+                        <name>MapEvent</name>
+                        <packageName></packageName>
+                        <script>-------------------------------------------------
+--         Put your Lua functions here.        --
+--                                             --
+-- Note that you can also use external Scripts --
+-------------------------------------------------
+
+function MapEvent()
+  clearWindow(mapconsole.name)
+  map = gmcp.Window.Frame.map
+  if USE_COLOURED_MAP_HACK and USE_COLOURED_MAP_HACK == 1337 then
+    map = map:gsub(&quot;\\e&quot;,string.char(27))
+    map = map:split(&quot;\n&quot;)
+    for i, s in ipairs(map) do
+      moveCursorEnd()
+      feedTriggers(s .. &quot;\n&quot;)
+      selectCurrentLine()
+      copy()
+      appendBuffer(&quot;mapconsole&quot;)
+      deleteLine()
+    end
+  else
+    local _, count = map:gsub(&quot;\\e&quot;, &quot;&quot;)
+    if count &gt; 0 then mapconsole:echo(&quot;You're using coloured map\noutput but do no use the\ncoloured map hack:\n&quot;) end
+    mapconsole:echo(map)
+  end
+end
+</script>
+                        <eventHandlerList>
+                            <string>gmcp.Window.Frame.map</string>
+                        </eventHandlerList>
+                    </Script>
+                </ScriptGroup>
+                <ScriptGroup isActive="yes" isFolder="yes">
+                    <name>Gauges</name>
+                    <packageName></packageName>
+                    <script>-------------------------------------------------
+--         Put your Lua functions here.        --
+--                                             --
+-- Note that you can also use external Scripts --
+-------------------------------------------------
+
+GUI.Footer = Geyser.HBox:new({
+  name = &quot;GUI.Footer&quot;,
+  x = 0, y = 0,
+  width = &quot;100%&quot;,
+  height = &quot;100%&quot;,
+},GUI.Bottom)
+
+GUI.LeftColumn = Geyser.VBox:new({
+  name = &quot;GUI.LeftColumn&quot;,
+},GUI.Footer)
+
+GUI.RightColumn = Geyser.VBox:new({
+  name = &quot;GUI.RightColumn&quot;,
+},GUI.Footer)
+
+GUI.GaugeBackCSS = CSSMan.new([[
+  background-color: rgba(0,0,0,0);
+  border-style: solid;
+  border-color: white;
+  border-width: 1px;
+  border-radius: 5px;
+  margin: 5px;
+]])
+
+GUI.GaugeFrontCSS = CSSMan.new([[
+  background-color: rgba(0,0,0,0);
+  border-style: solid;
+  border-color: white;
+  border-width: 1px;
+  border-radius: 5px;
+  margin: 5px;
+]])
+GUI.Health = Geyser.Gauge:new({
+  name = &quot;GUI.Health&quot;,
+},GUI.LeftColumn)
+GUI.Health.back:setStyleSheet(GUI.GaugeBackCSS:getCSS())
+GUI.GaugeFrontCSS:set(&quot;background-color&quot;,HPBAR_COLOR)
+GUI.Health.front:setStyleSheet(GUI.GaugeFrontCSS:getCSS())
+
+GUI.Guildpoints = Geyser.Gauge:new({
+  name = &quot;GUI.Guildpoints&quot;,
+},GUI.LeftColumn)
+GUI.Guildpoints.back:setStyleSheet(GUI.GaugeBackCSS:getCSS())
+GUI.GaugeFrontCSS:set(&quot;background-color&quot;,GPBAR_COLOR)
+GUI.Guildpoints.front:setStyleSheet(GUI.GaugeFrontCSS:getCSS())
+
+GUI.Experience = Geyser.Gauge:new({
+  name = &quot;GUI.Experience&quot;,
+},GUI.RightColumn)
+GUI.Experience.back:setStyleSheet(GUI.GaugeBackCSS:getCSS())
+GUI.GaugeFrontCSS:set(&quot;background-color&quot;,XPBAR_COLOR)
+GUI.Experience.front:setStyleSheet(GUI.GaugeFrontCSS:getCSS())
+
+GUI.Burden = Geyser.Gauge:new({
+  name = &quot;GUI.Burden&quot;,
+},GUI.RightColumn)
+GUI.Burden.back:setStyleSheet(GUI.GaugeBackCSS:getCSS())
+GUI.GaugeFrontCSS:set(&quot;background-color&quot;,BURDENBAR_COLOR)
+GUI.Burden.front:setStyleSheet(GUI.GaugeFrontCSS:getCSS())</script>
+                    <eventHandlerList/>
+                    <Script isActive="yes" isFolder="no">
+                        <name>VitalsEvent</name>
+                        <packageName></packageName>
+                        <script>-------------------------------------------------
+--         Put your Lua functions here.        --
+--                                             --
+-- Note that you can also use external Scripts --
+-------------------------------------------------
+
+function VitalsEvent()
+
+  --HP bar update
+  GUI.Health:setValue(gmcp.Char.Vitals.hp, gmcp.Char.Vitals.maxhp)
+  GUI.Health.back:echo(string.format(&quot;HP: [%d/%d]&quot;, gmcp.Char.Vitals.hp, gmcp.Char.Vitals.maxhp))
+  GUI.Health.front:echo(string.format(&quot;HP: [%d/%d]&quot;, gmcp.Char.Vitals.hp, gmcp.Char.Vitals.maxhp))
+  
+  --GP bar update
+  GUI.Guildpoints:setValue(gmcp.Char.Vitals.gp, gmcp.Char.Vitals.maxgp)
+  GUI.Guildpoints.front:echo(string.format([[&lt;span style = &quot;color: black&quot;&gt;GP: [%d/%d]&lt;/span&gt;]], gmcp.Char.Vitals.gp, gmcp.Char.Vitals.maxgp))
+
+  --XP bar update
+  GUI.Experience:setValue(gmcp.Char.Vitals.xp, MAXXP)
+  GUI.Experience.back:echo(string.format([[&lt;span style = &quot;color: white&quot;&gt;XP: [%d/%d]&lt;/span&gt;]],gmcp.Char.Vitals.xp, MAXXP))
+  GUI.Experience.front:echo(string.format([[&lt;span style = &quot;color: black&quot;&gt;XP: [%d/%d]&lt;/span&gt;]],gmcp.Char.Vitals.xp, MAXXP))
+
+  --Burden bar update
+  GUI.Burden:setValue(gmcp.Char.Vitals.burden, 100)
+  GUI.Burden.back:echo(string.format(&quot;Burden: [%d/%d]&quot;, gmcp.Char.Vitals.burden, 100))
+  GUI.Burden.front:echo(string.format(&quot;Burden: [%d/%d]&quot;, gmcp.Char.Vitals.burden, 100))
+  
+end</script>
+                        <eventHandlerList>
+                            <string>gmcp.Char.Vitals</string>
+                        </eventHandlerList>
+                    </Script>
+                </ScriptGroup>
+            </ScriptGroup>
+        </ScriptGroup>
+    </ScriptPackage>
+    <TriggerPackage>
+        <Trigger isActive="yes" isFolder="no" isTempTrigger="no" isMultiline="no" isPerlSlashGOption="no" isColorizerTrigger="no" isFilterTrigger="no" isSoundTrigger="no" isColorTrigger="no" isColorTriggerFg="no" isColorTriggerBg="no">
+            <name>Discworld GMCP</name>
+            <script>sendGMCP([[core.hello {&quot;client&quot;:&quot;mudlet&quot;, &quot;version&quot;:&quot;2.1.0&quot;}]])
+sendGMCP(&quot;core.supports.set \[\&quot;Char.Vitals\&quot;,\&quot;Window.Frame.map\&quot;\]&quot;)</script>
+            <triggerType>0</triggerType>
+            <conditonLineDelta>0</conditonLineDelta>
+            <mStayOpen>0</mStayOpen>
+            <mCommand></mCommand>
+            <packageName></packageName>
+            <mFgColor>#ff0000</mFgColor>
+            <mBgColor>#ffff00</mBgColor>
+            <mSoundFile></mSoundFile>
+            <colorTriggerFgColor>#000000</colorTriggerFgColor>
+            <colorTriggerBgColor>#000000</colorTriggerBgColor>
+            <regexCodeList>
+                <string>You last logged in from</string>
+                <string>You are already playing.</string>
+            </regexCodeList>
+            <regexCodePropertyList>
+                <integer>2</integer>
+                <integer>2</integer>
+            </regexCodePropertyList>
+        </Trigger>
+        <Trigger isActive="yes" isFolder="no" isTempTrigger="no" isMultiline="yes" isPerlSlashGOption="no" isColorizerTrigger="no" isFilterTrigger="no" isSoundTrigger="no" isColorTrigger="no" isColorTriggerFg="no" isColorTriggerBg="no">
+            <name>Inventory Gate</name>
+            <script>clearWindow(iconsole.name)</script>
+            <triggerType>0</triggerType>
+            <conditonLineDelta>0</conditonLineDelta>
+            <mStayOpen>999</mStayOpen>
+            <mCommand></mCommand>
+            <packageName></packageName>
+            <mFgColor>#ff0000</mFgColor>
+            <mBgColor>#ffff00</mBgColor>
+            <mSoundFile></mSoundFile>
+            <colorTriggerFgColor>#000000</colorTriggerFgColor>
+            <colorTriggerBgColor>#000000</colorTriggerBgColor>
+            <regexCodeList>
+                <string>You are unburdened (</string>
+                <string>) by:</string>
+            </regexCodeList>
+            <regexCodePropertyList>
+                <integer>2</integer>
+                <integer>0</integer>
+            </regexCodePropertyList>
+            <Trigger isActive="yes" isFolder="no" isTempTrigger="no" isMultiline="yes" isPerlSlashGOption="no" isColorizerTrigger="no" isFilterTrigger="no" isSoundTrigger="no" isColorTrigger="no" isColorTriggerFg="no" isColorTriggerBg="no">
+                <name>Take Inventory</name>
+                <script>selectCurrentLine()
+copy()
+appendBuffer(&quot;iconsole&quot;)
+deleteLine()
+
+--[[
+--remember to set fire length = 1000 before trying this
+if isFirstLine:
+  clearWindow(iconsole.name)
+  isFirstLine = 0
+end
+selectCurrentLine()
+copy()
+paste(&quot;iconsole&quot;)
+if last line:
+  isFirstLine = 1
+  setTriggerStayOpen(&quot;Gate&quot;,0)
+end
+--]]</script>
+                <triggerType>0</triggerType>
+                <conditonLineDelta>0</conditonLineDelta>
+                <mStayOpen>5</mStayOpen>
+                <mCommand></mCommand>
+                <packageName></packageName>
+                <mFgColor>#ff0000</mFgColor>
+                <mBgColor>#ffff00</mBgColor>
+                <mSoundFile></mSoundFile>
+                <colorTriggerFgColor>#000000</colorTriggerFgColor>
+                <colorTriggerBgColor>#000000</colorTriggerBgColor>
+                <regexCodeList>
+                    <string>You are unburdened (</string>
+                    <string>) by:</string>
+                </regexCodeList>
+                <regexCodePropertyList>
+                    <integer>2</integer>
+                    <integer>0</integer>
+                </regexCodePropertyList>
+            </Trigger>
+            <Trigger isActive="yes" isFolder="no" isTempTrigger="no" isMultiline="no" isPerlSlashGOption="no" isColorizerTrigger="no" isFilterTrigger="no" isSoundTrigger="no" isColorTrigger="no" isColorTriggerFg="no" isColorTriggerBg="no">
+                <name>Close Inventory Gate</name>
+                <script>setTriggerStayOpen(&quot;Inventory Gate&quot;,0)</script>
+                <triggerType>0</triggerType>
+                <conditonLineDelta>0</conditonLineDelta>
+                <mStayOpen>0</mStayOpen>
+                <mCommand></mCommand>
+                <packageName></packageName>
+                <mFgColor>#ff0000</mFgColor>
+                <mBgColor>#ffff00</mBgColor>
+                <mSoundFile></mSoundFile>
+                <colorTriggerFgColor>#000000</colorTriggerFgColor>
+                <colorTriggerBgColor>#000000</colorTriggerBgColor>
+                <regexCodeList>
+                    <string>Your purse </string>
+                </regexCodeList>
+                <regexCodePropertyList>
+                    <integer>2</integer>
+                </regexCodePropertyList>
+            </Trigger>
+        </Trigger>
+        <Trigger isActive="yes" isFolder="no" isTempTrigger="no" isMultiline="yes" isPerlSlashGOption="no" isColorizerTrigger="no" isFilterTrigger="no" isSoundTrigger="no" isColorTrigger="no" isColorTriggerFg="no" isColorTriggerBg="no">
+            <name>Score Gate</name>
+            <script>clearWindow(scoreconsole.name)</script>
+            <triggerType>0</triggerType>
+            <conditonLineDelta>0</conditonLineDelta>
+            <mStayOpen>999</mStayOpen>
+            <mCommand></mCommand>
+            <packageName></packageName>
+            <mFgColor>#ff0000</mFgColor>
+            <mBgColor>#ffff00</mBgColor>
+            <mSoundFile></mSoundFile>
+            <colorTriggerFgColor>#000000</colorTriggerFgColor>
+            <colorTriggerBgColor>#000000</colorTriggerBgColor>
+            <regexCodeList>
+                <string>You have </string>
+                <string>) achievement point</string>
+            </regexCodeList>
+            <regexCodePropertyList>
+                <integer>2</integer>
+                <integer>0</integer>
+            </regexCodePropertyList>
+            <Trigger isActive="yes" isFolder="no" isTempTrigger="no" isMultiline="yes" isPerlSlashGOption="no" isColorizerTrigger="no" isFilterTrigger="no" isSoundTrigger="no" isColorTrigger="no" isColorTriggerFg="no" isColorTriggerBg="no">
+                <name>Update Score</name>
+                <script>selectCurrentLine()
+copy()
+appendBuffer(&quot;scoreconsole&quot;)
+deleteLine()
+--echo(&quot;scoreconsole&quot;,&quot;\n&quot;)</script>
+                <triggerType>0</triggerType>
+                <conditonLineDelta>0</conditonLineDelta>
+                <mStayOpen>6</mStayOpen>
+                <mCommand></mCommand>
+                <packageName></packageName>
+                <mFgColor>#ff0000</mFgColor>
+                <mBgColor>#ffff00</mBgColor>
+                <mSoundFile></mSoundFile>
+                <colorTriggerFgColor>#000000</colorTriggerFgColor>
+                <colorTriggerBgColor>#000000</colorTriggerBgColor>
+                <regexCodeList>
+                    <string>You have </string>
+                    <string>) achievement point</string>
+                </regexCodeList>
+                <regexCodePropertyList>
+                    <integer>2</integer>
+                    <integer>0</integer>
+                </regexCodePropertyList>
+            </Trigger>
+            <Trigger isActive="yes" isFolder="no" isTempTrigger="no" isMultiline="no" isPerlSlashGOption="no" isColorizerTrigger="no" isFilterTrigger="no" isSoundTrigger="no" isColorTrigger="no" isColorTriggerFg="no" isColorTriggerBg="no">
+                <name>Close Score Gate</name>
+                <script>setTriggerStayOpen(&quot;Score Gate&quot;,0)</script>
+                <triggerType>0</triggerType>
+                <conditonLineDelta>0</conditonLineDelta>
+                <mStayOpen>0</mStayOpen>
+                <mCommand></mCommand>
+                <packageName></packageName>
+                <mFgColor>#ff0000</mFgColor>
+                <mBgColor>#ffff00</mBgColor>
+                <mSoundFile></mSoundFile>
+                <colorTriggerFgColor>#000000</colorTriggerFgColor>
+                <colorTriggerBgColor>#000000</colorTriggerBgColor>
+                <regexCodeList>
+                    <string> old and have logged in </string>
+                </regexCodeList>
+                <regexCodePropertyList>
+                    <integer>0</integer>
+                </regexCodePropertyList>
+            </Trigger>
+        </Trigger>
+        <Trigger isActive="yes" isFolder="no" isTempTrigger="no" isMultiline="no" isPerlSlashGOption="no" isColorizerTrigger="no" isFilterTrigger="no" isSoundTrigger="no" isColorTrigger="no" isColorTriggerFg="no" isColorTriggerBg="no">
+            <name>Satchel Gate</name>
+            <script>clearWindow(satchelconsole.name)
+echo(satchelconsole.name,&quot;Medium satchel:\n&quot;)</script>
+            <triggerType>0</triggerType>
+            <conditonLineDelta>0</conditonLineDelta>
+            <mStayOpen>999</mStayOpen>
+            <mCommand></mCommand>
+            <packageName></packageName>
+            <mFgColor>#ff0000</mFgColor>
+            <mBgColor>#ffff00</mBgColor>
+            <mSoundFile></mSoundFile>
+            <colorTriggerFgColor>#000000</colorTriggerFgColor>
+            <colorTriggerBgColor>#000000</colorTriggerBgColor>
+            <regexCodeList>
+                <string>The medium satchel has two main pockets and one side pocket.</string>
+            </regexCodeList>
+            <regexCodePropertyList>
+                <integer>3</integer>
+            </regexCodePropertyList>
+            <Trigger isActive="yes" isFolder="no" isTempTrigger="no" isMultiline="no" isPerlSlashGOption="no" isColorizerTrigger="no" isFilterTrigger="no" isSoundTrigger="no" isColorTrigger="no" isColorTriggerFg="no" isColorTriggerBg="no">
+                <name>Show Satchel Contents</name>
+                <script>selectCurrentLine()
+copy()
+appendBuffer(&quot;satchelconsole&quot;)
+deleteLine()
+setTriggerStayOpen(&quot;Satchel Gate&quot;,0)</script>
+                <triggerType>0</triggerType>
+                <conditonLineDelta>0</conditonLineDelta>
+                <mStayOpen>0</mStayOpen>
+                <mCommand></mCommand>
+                <packageName></packageName>
+                <mFgColor>#ff0000</mFgColor>
+                <mBgColor>#ffff00</mBgColor>
+                <mSoundFile></mSoundFile>
+                <colorTriggerFgColor>#000000</colorTriggerFgColor>
+                <colorTriggerBgColor>#000000</colorTriggerBgColor>
+                <regexCodeList>
+                    <string> with: </string>
+                </regexCodeList>
+                <regexCodePropertyList>
+                    <integer>0</integer>
+                </regexCodePropertyList>
+            </Trigger>
+        </Trigger>
+        <TriggerGroup isActive="yes" isFolder="yes" isTempTrigger="no" isMultiline="no" isPerlSlashGOption="no" isColorizerTrigger="no" isFilterTrigger="no" isSoundTrigger="no" isColorTrigger="no" isColorTriggerFg="no" isColorTriggerBg="no">
+            <name>Chat Window</name>
+            <script></script>
+            <triggerType>0</triggerType>
+            <conditonLineDelta>0</conditonLineDelta>
+            <mStayOpen>0</mStayOpen>
+            <mCommand></mCommand>
+            <packageName></packageName>
+            <mFgColor>#ff0000</mFgColor>
+            <mBgColor>#ffff00</mBgColor>
+            <mSoundFile></mSoundFile>
+            <colorTriggerFgColor>#000000</colorTriggerFgColor>
+            <colorTriggerBgColor>#000000</colorTriggerBgColor>
+            <regexCodeList/>
+            <regexCodePropertyList/>
+            <Trigger isActive="yes" isFolder="no" isTempTrigger="no" isMultiline="yes" isPerlSlashGOption="no" isColorizerTrigger="no" isFilterTrigger="no" isSoundTrigger="no" isColorTrigger="no" isColorTriggerFg="no" isColorTriggerBg="no">
+                <name>Update Chat</name>
+                <script>selectCurrentLine()
+copy()
+appendBuffer(&quot;chatconsole&quot;)
+deleteLine()</script>
+                <triggerType>0</triggerType>
+                <conditonLineDelta>0</conditonLineDelta>
+                <mStayOpen>0</mStayOpen>
+                <mCommand></mCommand>
+                <packageName></packageName>
+                <mFgColor>#ff0000</mFgColor>
+                <mBgColor>#ffff00</mBgColor>
+                <mSoundFile></mSoundFile>
+                <colorTriggerFgColor>#000000</colorTriggerFgColor>
+                <colorTriggerBgColor>#000000</colorTriggerBgColor>
+                <regexCodeList>
+                    <string>(</string>
+                    <string> wisps</string>
+                </regexCodeList>
+                <regexCodePropertyList>
+                    <integer>2</integer>
+                    <integer>0</integer>
+                </regexCodePropertyList>
+            </Trigger>
+        </TriggerGroup>
+    </TriggerPackage>
+</MudletPackage>
