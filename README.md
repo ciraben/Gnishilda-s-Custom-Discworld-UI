@@ -6,6 +6,8 @@ See [the original readme](./README.txt) for installation steps.
 
 Licensed under the [Hippocratic License 2.1](https://firstdonoharm.dev/).
 
+Here's an old screenshot of the GUI back when it worked smoothly.
+
 ![Here's a screenshot of the GUI.](./My_Discworld_GUI2.jpg)
 
 # Known issues
